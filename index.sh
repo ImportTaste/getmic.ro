@@ -27,7 +27,7 @@ function githubLatestStable {
 
 function githubLatestNightly {
   pyx="${pyx}import sys, json"
-  json=$(echo $(curl -sSL https://api.github.com/repos/$1/releases/tags/nightly) | \
+  json=$(curl -sfSL https://api.github.com/repos/$1/releases/tags/nightly | \
     ${pycom} -c "$pyx; [print(x['browser_download_url']) for x in json.load(sys.stdin)['assets']]")
   urllist=(`echo ${json}`);
   for x in "${urllist[@]}"; do
