@@ -26,15 +26,8 @@ function githubLatestStable {
 }
 
 function githubLatestNightly {
-  pyx="${pyx}import sys, json"
-  json=$(curl -sfSL https://api.github.com/repos/$1/releases/tags/nightly | \
-    ${pycom} -c "$pyx; [print(x['browser_download_url']) for x in json.load(sys.stdin)['assets']]")
-  urllist=(`echo ${json}`);
-  for x in "${urllist[@]}"; do
-    if [[ "$x" == *"$platform.tar.gz" ]]; then
-      echo -n "$x"
-    fi
-  done
+  json=$(curl -sfSL https://api.github.com/repos/$1/releases/tags/nightly)
+  echo "$json" | grep -Po $(echo '"browser_download_url".*'$platform'.tar.gz"') | cut -d '"' -f 4
 }
 
 
@@ -122,18 +115,6 @@ else
 fi
 
 if [[ "$*" == "nightly" ]]; then
-  if [[ "`python3 --version`" == "Python 3"* ]]; then
-    pycom='python3' pyx=''
-  elif [[ "`python --version`" == "Python 3"* ]]; then
-    pycom='python' pyx=''
-  elif [[ "`python2 --version`" == "Python 2"* ]]; then
-    pycom='python2' pyx='from __future__ import print_function;'
-  elif [[ "`python --version`" == "Python 2"* ]]; then
-    pycom='python' pyx='from __future__ import print_function;'
-  else
-    echo "A Python installation is required in order to install nightly builds."
-    exit 126
-  fi
   URL=$(githubLatestNightly zyedidia/micro)
 else
   URL=$(githubLatestStable zyedidia/micro)
